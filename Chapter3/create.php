@@ -1,0 +1,94 @@
+<?php
+session_start();
+require 'data.php';
+
+$thong_bao = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $ten_de_tai    = $_POST['ten_de_tai'] ?? '';
+    $ten_sinh_vien = $_POST['ten_sinh_vien'] ?? '';
+    $mssv          = $_POST['mssv'] ?? '';
+    $giang_vien_hd = $_POST['giang_vien_hd'] ?? '';
+    $nam_hoc       = $_POST['nam_hoc'] ?? '';
+    $trang_thai    = $_POST['trang_thai'] ?? 'Đang thực hiện';
+
+    // Tạo ID mới
+    $next_id = (max(array_column($do_an_list, 'id')) ?? 0) + 1;
+
+    // Thêm dữ liệu mới vào mảng
+    $new_entry = [
+        'id' => $next_id,
+        'ten_de_tai'    => $ten_de_tai,
+        'ten_sinh_vien' => $ten_sinh_vien,
+        'mssv'          => $mssv,
+        'giang_vien_hd' => $giang_vien_hd,
+        'nam_hoc'       => $nam_hoc,
+        'trang_thai'    => $trang_thai,
+        'created_at'    => date('Y-m-d H:i:s')
+    ];
+
+    $do_an_list[] = $new_entry;
+
+    // Lưu lại vào file
+    $data_file = __DIR__ . '/data.json';
+    file_put_contents($data_file, json_encode($do_an_list, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    // Redirect để minh họa vòng đời request
+    header("Location: index.php?success=created");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm đồ án mới (Demo POST)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="navbar">
+    <div>Quản lý Đồ án Tốt nghiệp</div>
+    <div>
+        <a href="index.php">Dashboard</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Thêm đồ án mới</h2>
+    <p>Form này chỉ dùng để minh họa cách gửi dữ liệu bằng <b>POST</b> trong PHP, chưa lưu vào CSDL.</p>
+
+    <form action="create.php" method="POST">
+        <div style="margin-bottom:10px;">
+            <label>Tên đề tài</label><br>
+            <input type="text" name="ten_de_tai" style="width:100%; padding:6px;" required>
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>Tên sinh viên</label><br>
+            <input type="text" name="ten_sinh_vien" style="width:100%; padding:6px;" required>
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>MSSV</label><br>
+            <input type="text" name="mssv" style="width:100%; padding:6px;" required>
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>Giảng viên hướng dẫn</label><br>
+            <input type="text" name="giang_vien_hd" style="width:100%; padding:6px;" required>
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>Năm học (vd: 2024-2025)</label><br>
+            <input type="text" name="nam_hoc" style="width:100%; padding:6px;" required>
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>Trạng thái</label><br>
+            <select name="trang_thai" style="width:100%; padding:6px;">
+                <option value="Đang thực hiện">Đang thực hiện</option>
+                <option value="Hoàn thành">Hoàn thành</option>
+                <option value="Chưa bắt đầu">Chưa bắt đầu</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Gửi dữ liệu (POST)</button>
+        <a href="index.php" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>
+</body>
+</html>
